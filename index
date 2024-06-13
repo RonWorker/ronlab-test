@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ron Lab</title>
+    <link rel="stylesheet" href="styles.css">
+
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#000222">
+<meta name="apple-mobile-web-app-title" content="Ron Lab">
+<meta name="application-name" content="Ron Lab">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+
+<!-- Apple Mobile Web App Status Bar Style -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+</head>
+<body>
+    <header>
+        <h1>Welcome to My Home Lab</h1>
+    </header>
+
+
+    <main>
+
+	<nav>
+        <ul>
+            <li><a href="https://ronlab.site/links.html">Lab Links</a></li>
+        </ul>
+    </nav>
+
+
+        <section>
+            <h2>Info</h2>
+            <p>Welcome to the lab! This is a simple static site.</p>
+		<p>This is the landing page, to access games/servers head to the "Lab Links" page.</p>
+		<p>Leave a google form for whitelist/password access.</p>
+		<p>enjoy.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 ron</p>
+    </footer>
+
+
+
+<button id="darkModeToggle">Toggle Dark Mode</button>
+
+    <script>
+        // JavaScript code for toggling dark mode and saving the status
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+
+            // Check if dark mode is active and store the status
+            const isDarkMode = body.classList.contains('dark-mode');
+            if (isDarkMode) {
+                localStorage.setItem('darkMode', 'enabled'); // Use localStorage for persistent storage
+            } else {
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        });
+
+        // JavaScript code to retrieve and apply dark mode status
+        document.addEventListener('DOMContentLoaded', () => {
+            const isDarkMode = localStorage.getItem('darkMode');
+
+            // Check if dark mode status exists and apply it
+            if (isDarkMode === 'enabled') {
+                body.classList.add('dark-mode');
+            }
+        });
+    </script>
+
+</body>
+</html>
+
