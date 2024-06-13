@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake Game</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#000222">
+  <meta name="apple-mobile-web-app-title" content="Ron Lab">
+  <meta name="application-name" content="Ron Lab">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+     .canvas-container {
+      width: 60%;
+      max-width: 70%;
+      margin: 0 auto;
+      background-color: #ababab;
+      border: 2px solid black;
+      height: calc(80vh - 300px);
+      position: relative;
+      top: 200px;
+    }
+    canvas {
+      display: block;
+      max-width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    @media (max-width: 480px) {
+      canvas {
+        width: 100%;
+        max-width: none;
+      }
+    }
+    .title {
+      position: absolute;
+      top: 8%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: black;
+      font-size: 50px;
+      font-family: 'biome', sans-serif;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    #score, #highScore, #backButton, .site-button, #pausePlayButton, #colorInput, .difficulty-button {
+      position: absolute;
+      font-family: 'biome', sans-serif;
+    }
+    #score {
+      top: 5%;
+      left: 88%;
+      transform: translateX(-50%, 50%);
+      color: black;
+      font-size: 20px;
+    }
+    #highScore {
+      top: 12%;
+      left: 88%;
+      transform: translateX(-50%, 50%);
+      color: black;
+      font-size: 20px;
+    }
+    #backButton {
+      top: 7%;
+      left: 7%;
+      transform: translateX(-20%, -50%);
+    }
+    .site-button {
+      top: 7%;
+      left: 5%;
+      transform: translateX(-50%, 50%);
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    .favicon {
+      width: 16px;
+      height: 16px;
+      margin-right: 5px;
+    }
+    #pausePlayButton {
+      top: 26%;
+      left: 87%;
+      transform: translate(-20%, -50%);
+    }
+    #colorInput {
+      top: 36%;
+      left: 86%;
+      width: 95px;
+    }
+    .difficulty-button {
+      top: 30%;
+      left: 88%;
+      transform: translate(-20%, -50%);
+    }
+  </style>
+</head>
+<body>
+  <a href="https://ronlab.site" class="site-button">
+    <img src="/favicon.ico" alt="Ron Lab" class="favicon">
+  </a>
+  <input type="color" id="colorInput" value="#00ff00">
+  <button id="backButton">Lab Links</button>
+  <button id="pausePlayButton">Pause</button>
+  <div class="title">Snake</div>
+  <p id="score">Score: 0</p>
+  <p id="highScore">High Score: 0</p>
+  <button id="difficultyButton" class="difficulty-button">Change Difficulty (broken)</button>
+  <div class="canvas-container">
+    <canvas id="game"></canvas>
+  </div>
+  <script>
+    var snakeColor = '#00ff00'; // Default color
+    var canvas = document.getElementById('game');
+    var context = canvas.getContext('2d');
+    var score = 0;
+    var currentScore = 0;
+    var highScore = 0;
+    var gamePaused = false;
+    var grid = 30;
+    var count = 0;
+    var snake = {
+      x: 0,
+      y: 0,
+      dx: grid,
+      dy: 0,
+      cells: [],
+      maxCells: 4
+    };
+    var apple = {
+      x: 0,
+      y: 0
+    };
+
+
+
+// Add touch event listeners to move the snake
+document.addEventListener('touchstart', handleTouchStart);
+document.addEventListener('touchmove', handleTouchMove);
+
+// Variables to store touch start position
+let touchStartX = 0;
+let touchStartY = 0;
+
+function handleTouchStart(event) {
+  // Get the initial touch position
+  touchStartX = event.touches[0].clientX;
+  touchStartY = event.touches[0].clientY;
+}
+
+function handleTouchMove(event) {
+  // Get the current touch position
+  const touchX = event.touches[0].clientX;
+  const touchY = event.touches[0].clientY;
+
+  // Calculate the horizontal and vertical distance moved
+  const deltaX = touchX - touchStartX;
+  const deltaY = touchY - touchStartY;
+
+  // Determine the direction of movement and update the snake's velocity accordingly
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    // Horizontal movement
+    if (deltaX > 0 && snake.dx === 0) {
+      snake.dx = grid;
+      snake.dy = 0;
+    } else if (deltaX < 0 && snake.dx === 0) {
+      snake.dx = -grid;
+      snake.dy = 0;
+    }
+  } else {
+    // Vertical movement
+    if (deltaY > 0 && snake.dy === 0) {
+      snake.dy = grid;
+      snake.dx = 0;
+    } else if (deltaY < 0 && snake.dy === 0) {
+      snake.dy = -grid;
+      snake.dx = 0;
+    }
+  }
+
+  // Update touch start position for the next move
+  touchStartX = touchX;
+  touchStartY = touchY;
+}
+
+
+
+
+
+    function resizeCanvas() {
+      const container = document.querySelector('.canvas-container');
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+      resetGame();
+    }
+
+    function resetGame() {
+      snake.x = (canvas.width / grid / 2) * grid;
+      snake.y = (canvas.height / grid / 2) * grid;
+      snake.cells = [];
+      snake.maxCells = 4;
+      snake.dx = grid;
+      snake.dy = 0;
+      apple.x = getRandomInt(0, (canvas.width / grid)) * grid;
+      apple.y = getRandomInt(0, (canvas.height / grid)) * grid;
+      score = 0;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min)) + min;
+    }
+
+    function togglePausePlay() {
+      gamePaused = !gamePaused;
+      document.getElementById('pausePlayButton').textContent = gamePaused ? 'Play' : 'Pause';
+      if (!gamePaused) {
+        requestAnimationFrame(loop);
+      }
+    }
+
+    document.getElementById('pausePlayButton').addEventListener('click', togglePausePlay);
+
+    function loop() {
+      if (!gamePaused) {
+        requestAnimationFrame(loop);
+        if (++count < 4) return;
+        count = 0;
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        snake.x += snake.dx;
+        snake.y += snake.dy;
+        if (snake.x < 0) {
+          snake.x = canvas.width - grid;
+        } else if (snake.x >= canvas.width) {
+          snake.x = 0;
+        }
+        if (snake.y < 0) {
+          snake.y = canvas.height - grid;
+        } else if (snake.y >= canvas.height) {
+          snake.y = 0;
+        }
+        snake.cells.unshift({ x: snake.x, y: snake.y });
+        if (snake.cells.length > snake.maxCells) {
+          snake.cells.pop();
+        }
+        context.fillStyle = 'red';
+        context.fillRect(apple.x, apple.y, grid - 1, grid - 1);
+        context.fillStyle = snakeColor;
+        snake.cells.forEach(function(cell, index) {
+          context.fillRect(cell.x, cell.y, grid - 1, grid - 1);
+          if (cell.x === apple.x && cell.y === apple.y) {
+            snake.maxCells++;
+            score++;
+            currentScore++;
+            apple.x = getRandomInt(0, canvas.width / grid) * grid;
+            apple.y = getRandomInt(0, canvas.height / grid) * grid;
+            if (score > highScore) {
+              highScore = score;
+              localStorage.setItem('highScore', highScore);
+            }
+          }
+          document.getElementById('score').textContent = 'Score: ' + score;
+          document.getElementById('highScore').textContent = 'High Score: ' + highScore;
+          for (var i = index + 1; i < snake.cells.length; i++) {
+            if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+              resetGame();
+            }
+          }
+        });
+      }
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.which === 37 && snake.dx === 0) {
+        snake.dx = -grid;
+        snake.dy = 0;
+      } else if (e.which === 38 && snake.dy === 0) {
+        snake.dy = -grid;
+        snake.dx = 0;
+      } else if (e.which === 39 && snake.dx === 0) {
+        snake.dx = grid;
+        snake.dy = 0;
+      } else if (e.which === 40 && snake.dy === 0) {
+        snake.dy = grid;
+        snake.dx = 0;
+      }
+    });
+    document.getElementById('backButton').addEventListener('click', function() {
+      window.location.href = 'https://ronlab.site/links.html';
+    });
+    document.getElementById('colorInput').addEventListener('input', function(event) {
+      snakeColor = event.target.value;
+    });
+    highScore = localStorage.getItem('highScore') || 0;
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
